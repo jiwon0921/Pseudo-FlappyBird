@@ -11,7 +11,7 @@ namespace PFB
     public enum ePFBLogType
     {
         [HideInInspector]
-        FollowLogHelperCurrent,
+        Default,
         Log,
         Info,
         Warning,
@@ -34,11 +34,11 @@ namespace PFB
         [Tooltip("로그를 발송할 때마다 저장합니다.")]
         OnRealTime,
 
-        [Tooltip("PlayMode가 종료될 때 한꺼번에 저장합니다.")]
-        OnExitPlayMode,
+        //[Tooltip("PlayMode가 종료될 때 한꺼번에 저장합니다.")]
+        //OnExitPlayMode,
 
-        [Tooltip("게임이 종료될 때 한꺼번에 저장합니다.")]
-        OnExitGame,
+        //[Tooltip("게임이 종료될 때 한꺼번에 저장합니다.")]
+        //OnExitGame,
 
 
     }
@@ -64,7 +64,7 @@ namespace PFB
             }
 
             objectTitleRichText = str;
-            objectTitle = GetOnlyTitle(objectTitleRichText);
+            objectTitle = PFBLogHelper.RemoveRichText(objectTitleRichText);
         }
         /// <summary>
         /// 서식이 포함된 타이틀 텍스트입니다.
@@ -77,32 +77,22 @@ namespace PFB
         public string objectTitle { get; private set; }
 
 
-        /// <summary>
-        /// 서식 텍스트를 빼서 반환합니다.
-        /// </summary>
-        private string GetOnlyTitle(string name)
-        {
-            Regex rich = new Regex(@"<[^>]*>");
-
-            if (rich.IsMatch(name))
-            {
-                name = rich.Replace(name, string.Empty);
-            }
-            return name;
-        }
 
         public void Log(object msg, ePFBLogType logType)
         {
             PFBLogHelper.current.Log(objectTitleRichText + msg, logType);
         }
+
         public void Log(object msg)
         {
             PFBLogHelper.current.Log(objectTitleRichText + msg);
         }
+
         public void LogInfo(object msg)
         {
             PFBLogHelper.current.LogInfo(objectTitleRichText + msg);
         }
+
         public void LogWarning(object msg)
         {
             PFBLogHelper.current.LogWarning(objectTitleRichText + msg);

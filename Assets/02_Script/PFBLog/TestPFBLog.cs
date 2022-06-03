@@ -11,10 +11,14 @@ public class TestPFBLog : MonoBehaviour
     {
         PFBLogHelper.GetSafeCurrent();
 
-        PFBLogHelper.current.SetDefaultLogType(ePFBLogType.Warning);
-        log.Log("Warning?");
-        log.Log("LogInfoType!", ePFBLogType.Info);
+        PFBLogHelper.current.SetSaveMode(ePFBLogSaveMode.OnRealTime);
+
+        PFBLogHelper.current.SetDefaultLogType(ePFBLogType.Info);
+
+        log.LogWarning("Warning?");
+        log.Log("LogInfoType!", ePFBLogType.Default);
         PFBLogHelper.current.SetDefaultLogType(ePFBLogType.Log);
+        log.Log("LogDefaultType!", ePFBLogType.Default);
     }
 
     // Update is called once per frame

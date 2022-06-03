@@ -9,24 +9,67 @@ using PFB;
 
 public class PFBLogHelper : MonoBehaviour
 {
+
+    #region 변수들 --
+
+
     public static PFBLogHelper current { get; private set; }
 
-    private bool isCreatedGameObject;
+    public bool isCreatedGameObject;
+
+    //----------------------------------
+    // 설정 관련
+    //----------------------------------
     public ePFBLogSaveMode logSaveMode { get; private set; }
     public ePFBLogType defaultLogType { get; private set; } = ePFBLogType.Log;
 
+
+
+    //----------------------------------
+    // File 관련
+    //----------------------------------
+
     public string logTypeString { get; private set; }
+
+    private DirectoryInfo localDirectoryInfo;
+    private FileInfo localFileInfo;
+
+    public string localFilePath { get; private set; } = Directory.GetCurrentDirectory() + @"\PFBLogs\PFBLog-" + DateTime.Today.ToString("yyyy-MM-dd") + ".log";
+    public string localDirectioryPath { get; private set; } = Directory.GetCurrentDirectory() + @"\PFBLogs";
+
+
+
+    //----------------------------------
+    // Log Data 관련 
+    //----------------------------------
+
+    private Queue<string> logStringQueue = null;
+
+
+    #endregion
+
+    private void Awake()
+    {
+        //if (!isCreatedGameObject)
+        //{
+        //    GetSafeCurrent();
+        //}
+    }
+    private void OnDestroy()
+    {
+        current = null;
+    }
 
     public void Log(object msg, ePFBLogType logType)
     {
-        if (logType == ePFBLogType.FollowLogHelperCurrent)
+        if (logType == ePFBLogType.Default)
         {
             logType = defaultLogType;
         }
 
         switch (logType)
         {
-            case ePFBLogType.FollowLogHelperCurrent:
+            case ePFBLogType.Default:
             case ePFBLogType.Log:
                 Log(msg);
                 break;
@@ -50,31 +93,45 @@ public class PFBLogHelper : MonoBehaviour
     public void Log(object msg)
     {
         Debug.Log(msg);
+        TrySaveLog(msg.ToString());
     }
     public void LogInfo(object msg)
     {
+
         Debug.Log("<color=blue>" + msg + "</color>");
+        TrySaveLog(msg.ToString());
     }
 
     public void LogWarning(object msg)
     {
         Debug.LogWarning(msg);
+        TrySaveLog(msg.ToString());
 
     }
     public void LogError(object msg)
     {
-
         Debug.LogError(msg);
-    }
-    private void Awake()
-    {
-        //Init_Instance();
+        TrySaveLog(msg.ToString());
     }
 
-
-    private void TrySaveLog()
+    private void TrySaveLog(string msg)
     {
+        switch (logSaveMode)
+        {
+            case ePFBLogSaveMode.DoNotSave:
+                break;
 
+            case ePFBLogSaveMode.OnRealTime:
+
+                msg = RemoveRichText(msg);
+                Debug.Log(msg);
+                logStringQueue.Enqueue(msg);
+                SaveLogToTxtFile();
+                break;
+
+            default:
+                break;
+        }
     }
 
     public static PFBLogHelper GetSafeCurrent()
@@ -82,108 +139,86 @@ public class PFBLogHelper : MonoBehaviour
         //없으면 새로 생성해야함
         if (current == null)
         {
-            GameObject helperObject = new GameObject("[PFBLogHelper]");
+            //게임오브젝트 생성
+            GameObject helperObject = new GameObject("[--PFBLogHelper--]");
             current = helperObject.AddComponent<PFBLogHelper>();
+            current.isCreatedGameObject = true;
+            //파일 관련 작업
+            string localFilePath = Directory.GetCurrentDirectory() + @"\PFBLogs\PFBLog-" + DateTime.Today.ToString("yyyy-MM-dd") + ".log";
+            string localDirectioryPath = Directory.GetCurrentDirectory() + @"\PFBLogs";
 
+            current.SetLocalDirectoryAndFileInfo(localDirectioryPath, localFilePath);
+            //큐 초기화
+            current.logStringQueue = new Queue<string>();
             return current;
         }
-        //있으면 자살
+        //있으면 뭐...
         else
         {
             return current;
         }
     }
 
+    public void SetLocalDirectoryAndFileInfo(string diPath, string fiPath)
+    {
+        localDirectoryInfo = new DirectoryInfo(diPath);
+        localFileInfo = new FileInfo(fiPath);
+
+        //폴더 생성
+        if (!localDirectoryInfo.Exists)
+        {
+            Directory.CreateDirectory(diPath);
+        }
+
+        //파일 생성
+        if (!localFileInfo.Exists)
+        {
+            using (StreamWriter sw = new StreamWriter(fiPath))
+            {
+                string logText = string.Format("[SYSTEM] ({0}) {1}", GetDateTime(), "Create New Log File");
+                sw.WriteLine(logText);
+                sw.Close();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 서식 텍스트를 빼서 반환합니다.
+    /// </summary>
+    public static string RemoveRichText(string str)
+    {
+        Regex rich = new Regex(@"<[^>]*>");
+
+        if (rich.IsMatch(str))
+        {
+            str = rich.Replace(str, string.Empty);
+        }
+        return str;
+    }
+
+    public void SetDefaultLogType(ePFBLogType logType)
+    {
+        if (logType == ePFBLogType.Default)
+        {
+            logType = ePFBLogType.Log;
+        }
+        defaultLogType = logType;
+        SetLogTypeString(logType);
+    }
+    public void SetSaveMode(ePFBLogSaveMode saveMode)
+    {
+        logSaveMode = logSaveMode;
+    }
 
     /// <summary>
     /// 로그의 저장 방식을 설정합니다.
     /// </summary>
     /// <param name="saveMode"></param>
-    public void SetSaveMode(ePFBLogSaveMode saveMode)
-    {
-        current.logSaveMode = logSaveMode;
-    }
-
-    public void SetDefaultLogType(ePFBLogType logType)
-    {
-        if (logType == ePFBLogType.FollowLogHelperCurrent)
-        {
-            logType = ePFBLogType.Log;
-        }
-        current.defaultLogType = logType;
-        SetLogTypeString(logType);
-    }
-
-    private void Init_Instance()
-    {
-        //없으면 새로 생성해야함
-        if (current == null)
-        {
-            CreateGameObject();
-        }
-        //있으면 자살
-        else
-        {
-            if (current != this)
-            {
-                Destroy(this.gameObject);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 로그 내용을 파일로 기록합니다.
-    /// </summary>
-    public void SaveLogToTxtFile(object msg)
-    {
-        string FilePath = Directory.GetCurrentDirectory() + @"\Logs\CarsLog-CarLogTester-" + DateTime.Today.ToString("yyyyMMdd") + ".log";
-        string DirPath = Directory.GetCurrentDirectory() + @"\Logs";
-
-        string logText;
-
-        DirectoryInfo di = new DirectoryInfo(DirPath);
-        FileInfo fi = new FileInfo(FilePath);
-        try
-        {
-            if (!di.Exists) Directory.CreateDirectory(DirPath);
-
-            if (!fi.Exists)
-            {
-                using (StreamWriter sw = new StreamWriter(FilePath))
-                {
-                    logText = string.Format("[{0}] {1}", GetDateTime(), msg);
-                    sw.WriteLine(logText);
-                    sw.Close();
-
-                }
-            }
-            else
-            {
-                using (StreamWriter sw = File.AppendText(FilePath))
-                {
-                    logText = string.Format("[{0}] {1}", GetDateTime(), msg);
-                    sw.WriteLine(logText);
-                    sw.Close();
-                }
-            }
-        }
-        catch (Exception e)
-        {
-
-        }
-    }
-
-    private string GetDateTime()
-    {
-        DateTime NowDate = DateTime.Now;
-        return NowDate.ToString("yyyy-MM-dd/HH:mm:ss") + ":" + NowDate.Millisecond.ToString("000");
-    }
-
     private void SetLogTypeString(ePFBLogType logType)
     {
         switch (logType)
         {
-            case ePFBLogType.FollowLogHelperCurrent:
+            case ePFBLogType.Default:
             case ePFBLogType.Log:
                 logTypeString = "[LOG]";
                 break;
@@ -201,6 +236,42 @@ public class PFBLogHelper : MonoBehaviour
                 break;
         }
     }
+
+
+    private string GetDateTime()
+    {
+        DateTime NowDate = DateTime.Now;
+        return NowDate.ToString("yyyy-MM-dd/HH:mm:ss") + ":" + NowDate.Millisecond.ToString("000");
+    }
+
+    /// <summary>
+    /// 로그 내용을 파일로 기록합니다.
+    /// </summary>
+    public void SaveLogToTxtFile()
+    {
+
+        string logText;
+
+        try
+        {
+            using (StreamWriter sw = File.AppendText(localFilePath))
+            {
+
+                while (logStringQueue.Count > 0)
+                {
+                    logText = logStringQueue.Dequeue();
+                    sw.WriteLine(logText);
+                }
+                sw.Close();
+            }
+
+        }
+        catch (Exception e)
+        {
+            print(string.Format("[오류발생] - 사유 : {0}", e.ToString()));
+        }
+    }
+
     private void CreateGameObject()
     {
         GameObject helperObject = new GameObject("[PFBLogHelper]");

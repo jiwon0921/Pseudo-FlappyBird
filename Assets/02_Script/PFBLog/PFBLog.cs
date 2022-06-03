@@ -18,6 +18,39 @@ namespace PFB
         Error,
     }
 
+    public class PFBLogMessage
+    {
+        public ePFBLogType pfbLogType;
+        public string dateString;
+        public string titleRichString;
+        public string titleString;
+        public string messageString;
+        public PFBLogMessage(ePFBLogType logType, string date, string titleRichText, string title, string msg)
+        {
+            pfbLogType = logType;
+            dateString = date;
+            titleString = title;
+            titleRichString = titleRichText;
+            messageString = msg;
+        }
+        public PFBLogMessage(string date, string titleRichText, string title, string msg)
+        {
+            dateString = date;
+            titleString = title;
+            titleRichString = titleRichText;
+            messageString = msg;
+        }
+
+        public PFBLogMessage(string date, string title, string msg)
+        {
+            pfbLogType = PFBLogHelper.current.defaultLogType;
+            dateString = date;
+            titleString = title;
+            titleRichString = title;
+            messageString = msg;
+        }
+    }
+
     //public enum eLogFileCreateMode
     //{
     //    [Tooltip("하루마다 파일을 새로 생성합니다.")]
@@ -34,8 +67,8 @@ namespace PFB
         [Tooltip("로그를 발송할 때마다 저장합니다.")]
         OnRealTime,
 
-        //[Tooltip("PlayMode가 종료될 때 한꺼번에 저장합니다.")]
-        //OnExitPlayMode,
+        [Tooltip("에디터와 게임의 동작이 다릅니다. \n[Editor]PlayMode가 종료될 때 한꺼번에 저장합니다.\n[Game]게임이 종료될 때 한꺼번에 저장합니다.")]
+        OnExit,
 
         //[Tooltip("게임이 종료될 때 한꺼번에 저장합니다.")]
         //OnExitGame,
@@ -47,6 +80,7 @@ namespace PFB
     /// </summary>
     public class PFBLog
     {
+        private PFBLogMessage message;
         public PFBLog(string name, Color32 color = default, bool isBoldTitle = true)
         {
             string str = "[" + name + "] ";
@@ -65,6 +99,7 @@ namespace PFB
 
             objectTitleRichText = str;
             objectTitle = PFBLogHelper.RemoveRichText(objectTitleRichText);
+            message = new PFBLogMessage(string.Empty, objectTitleRichText, objectTitle, "Create!");
         }
         /// <summary>
         /// 서식이 포함된 타이틀 텍스트입니다.
@@ -80,27 +115,42 @@ namespace PFB
 
         public void Log(object msg, ePFBLogType logType)
         {
-            PFBLogHelper.current.Log(objectTitleRichText + msg, logType);
+            message.dateString = PFBLogHelper.current.GetDateTime();
+            message.messageString = msg.ToString();
+            PFBLogHelper.current.LogType(message);
+            //PFBLogHelper.current.LogType(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
         }
 
         public void Log(object msg)
         {
-            PFBLogHelper.current.Log(objectTitleRichText + msg);
+            message.dateString = PFBLogHelper.current.GetDateTime();
+            message.messageString = msg.ToString();
+            PFBLogHelper.current.Log(message);
+            //PFBLogHelper.current.Log(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
         }
 
         public void LogInfo(object msg)
         {
-            PFBLogHelper.current.LogInfo(objectTitleRichText + msg);
+            message.dateString = PFBLogHelper.current.GetDateTime();
+            message.messageString = msg.ToString();
+            PFBLogHelper.current.LogInfo(message);
+            //PFBLogHelper.current.LogInfo(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
         }
 
         public void LogWarning(object msg)
         {
-            PFBLogHelper.current.LogWarning(objectTitleRichText + msg);
+            message.dateString = PFBLogHelper.current.GetDateTime();
+            message.messageString = msg.ToString();
+            PFBLogHelper.current.LogWarning(message);
+            //PFBLogHelper.current.LogWarning(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
         }
 
         public void LogError(object msg)
         {
-            PFBLogHelper.current.LogError(objectTitleRichText + msg);
+            message.dateString = PFBLogHelper.current.GetDateTime();
+            message.messageString = msg.ToString();
+            PFBLogHelper.current.LogError(message);
+            //PFBLogHelper.current.LogError(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
         }
 
     }

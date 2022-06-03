@@ -60,14 +60,14 @@ public class PFBLogHelper : MonoBehaviour
         current = null;
     }
 
-    public void Log(object msg, ePFBLogType logType)
+    public void LogType(PFBLogMessage msg)
     {
-        if (logType == ePFBLogType.Default)
+        if (msg.pfbLogType == ePFBLogType.Default)
         {
-            logType = defaultLogType;
+            msg.pfbLogType = current.defaultLogType;
         }
 
-        switch (logType)
+        switch (msg.pfbLogType)
         {
             case ePFBLogType.Default:
             case ePFBLogType.Log:
@@ -90,32 +90,37 @@ public class PFBLogHelper : MonoBehaviour
                 break;
         }
     }
-    public void Log(object msg)
+    public void Log(PFBLogMessage msg)
     {
-        Debug.Log(msg);
-        TrySaveLog(msg.ToString());
+        msg.pfbLogType = ePFBLogType.Log;
+        Debug.Log(GetLogTextForUnityConsole(msg));
+        TrySaveLog(msg);
     }
-    public void LogInfo(object msg)
+    public void LogInfo(PFBLogMessage msg)
     {
-
-        Debug.Log("<color=blue>" + msg + "</color>");
-        TrySaveLog(msg.ToString());
-    }
-
-    public void LogWarning(object msg)
-    {
-        Debug.LogWarning(msg);
-        TrySaveLog(msg.ToString());
-
-    }
-    public void LogError(object msg)
-    {
-        Debug.LogError(msg);
-        TrySaveLog(msg.ToString());
+        msg.pfbLogType = ePFBLogType.Info;
+        msg.messageString = "<color=blue>" + msg.messageString + "</color>";
+        Debug.Log(GetLogTextForUnityConsole(msg));
+        TrySaveLog(msg);
     }
 
-    private void TrySaveLog(string msg)
+    public void LogWarning(PFBLogMessage msg)
     {
+        msg.pfbLogType = ePFBLogType.Warning;
+        Debug.LogWarning(GetLogTextForUnityConsole(msg));
+        TrySaveLog(msg);
+
+    }
+    public void LogError(PFBLogMessage msg)
+    {
+        msg.pfbLogType = ePFBLogType.Error;
+        Debug.LogError(GetLogTextForUnityConsole(msg));
+        TrySaveLog(msg);
+    }
+
+    private void TrySaveLog(PFBLogMessage msg)
+    {
+        string str;
         switch (logSaveMode)
         {
             case ePFBLogSaveMode.DoNotSave:
@@ -123,9 +128,10 @@ public class PFBLogHelper : MonoBehaviour
 
             case ePFBLogSaveMode.OnRealTime:
 
-                msg = RemoveRichText(msg);
-                Debug.Log(msg);
-                logStringQueue.Enqueue(msg);
+                //msg = RemoveRichText(msg.);
+                str = GetLogTextForFile(msg);
+
+                logStringQueue.Enqueue(str);
                 SaveLogToTxtFile();
                 break;
 
@@ -196,18 +202,18 @@ public class PFBLogHelper : MonoBehaviour
         return str;
     }
 
-    public void SetDefaultLogType(ePFBLogType logType)
+    public static void SetDefaultLogType(ePFBLogType logType)
     {
         if (logType == ePFBLogType.Default)
         {
             logType = ePFBLogType.Log;
         }
-        defaultLogType = logType;
-        SetLogTypeString(logType);
+        current.defaultLogType = logType;
+        current.SetLogTypeString(logType);
     }
-    public void SetSaveMode(ePFBLogSaveMode saveMode)
+    public static void SetSaveMode(ePFBLogSaveMode saveMode)
     {
-        logSaveMode = logSaveMode;
+        current.logSaveMode = saveMode;
     }
 
     /// <summary>
@@ -236,9 +242,43 @@ public class PFBLogHelper : MonoBehaviour
                 break;
         }
     }
+    private string GetLogTypeString(ePFBLogType logType)
+    {
+        string str;
+        switch (logType)
+        {
+            case ePFBLogType.Default:
+            case ePFBLogType.Log:
+                str = "[LOG]";
+                break;
+            case ePFBLogType.Info:
+                str = "[INFO]";
+                break;
+            case ePFBLogType.Warning:
+                str = "[WARN]";
+                break;
+            case ePFBLogType.Error:
+                str = "[ERROR]";
+                break;
+            default:
+                str = "[LOG]";
+                break;
+        }
+
+        return str;
+    }
 
 
-    private string GetDateTime()
+    public string GetLogTextForUnityConsole(PFBLogMessage msg)
+    {
+        return string.Format("{0}{1}", msg.titleRichString, msg.messageString);
+    }
+    public string GetLogTextForFile(PFBLogMessage msg)
+    {
+        msg.messageString = RemoveRichText(msg.messageString);
+        return string.Format("{0} ({1}) {2}{3}", new string[4] { GetLogTypeString(msg.pfbLogType), msg.dateString, msg.titleString, msg.messageString });
+    }
+    public string GetDateTime()
     {
         DateTime NowDate = DateTime.Now;
         return NowDate.ToString("yyyy-MM-dd/HH:mm:ss") + ":" + NowDate.Millisecond.ToString("000");
@@ -278,6 +318,15 @@ public class PFBLogHelper : MonoBehaviour
         current = helperObject.AddComponent<PFBLogHelper>();
     }
 
+
+    private void OnApplicationQuit()
+    {
+        if (current.logSaveMode == ePFBLogSaveMode.OnExit)
+        {
+            SaveLogToTxtFile();
+        }
+
+    }
 
 
 }

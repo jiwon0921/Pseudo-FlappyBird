@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     public UIInGame uiInGame;
     public UIReady uiReady;
     public UIResult uiResult;
+    public UIRanking uiRanking;
 
     private void Awake()
     {

@@ -6,14 +6,18 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public PlayerData playerData;
+
     public ColumnPool columnPool;
     public StageManager stageManager;
     public BirdController bird;
 
     public Vector2 originalBirdPosition;
 
+    public string playerName;
+
     public int score;
-    public int bestScore;
+    public int bestScore = 0;
 
     public bool isGameover;
     public bool isReady;
@@ -27,6 +31,9 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
         }
+
+        // PlayerPrsfs에 저장한 데이터 삭제
+        PlayerPrefs.DeleteAll();
 
         //GameObject.DontDestroyOnLoad(this.gameObject);
     }
@@ -55,8 +62,11 @@ public class GameManager : MonoBehaviour
         isReady = true;
         score = 0;
         UIManager.Instance.uiReady.Toggle(true);
+        UIManager.Instance.uiReady.OffStartButton();
+        UIManager.Instance.uiReady.namePanel.SetActive(true);
         UIManager.Instance.uiInGame.Toggle(false);
         UIManager.Instance.uiResult.Toggle(false);
+        UIManager.Instance.uiRanking.Toggle(false);
         moveFloor = stageManager.MoveFloor();
         StartCoroutine(moveFloor);
     }
@@ -72,14 +82,17 @@ public class GameManager : MonoBehaviour
         StartCoroutine(spawnAndMoveColumn);
     }
 
-
     public void GameOver()
     {
         isGameover = true;
+        CheckBestScore();
         Debug.Log("Game Over");
         StopCoroutine(spawnAndMoveColumn);
         StopCoroutine(moveFloor);
+        PlayerData.Instance.UpdateRanking();
         UIManager.Instance.uiResult.UpdateScore();
+        UIManager.Instance.uiResult.UpdateBestScore();
+        UIManager.Instance.uiRanking.LoadRankingData();
         IEnumerator uiResult = ResultUIControl();
         UIManager.Instance.uiInGame.flash.SetTrigger("Flash");
         StartCoroutine(uiResult);
@@ -90,6 +103,35 @@ public class GameManager : MonoBehaviour
     {
         initialize();
         GameReady();
+    }
+
+    public void CheckBestScore()
+    {
+        int currentScore = score;
+        int currentBestScore = bestScore;
+
+        if(currentScore > bestScore)
+        {
+            bestScore = currentScore;
+        }
+        else
+        {
+            bestScore = currentBestScore;
+        }
+
+        PlayerData.Instance.SetBestScore();
+    }
+
+    public void OpenRanking(bool val)
+    {
+        if(val)
+        {
+            UIManager.Instance.uiRanking.Toggle(true);
+        }
+        else
+        {
+            UIManager.Instance.uiRanking.Toggle(false);
+        }
     }
 
     IEnumerator ResultUIControl()
@@ -103,5 +145,15 @@ public class GameManager : MonoBehaviour
     public int GetScore()
     {
         return score;
+    }
+
+    public int GetBestScore()
+    {
+        return bestScore;
+    }
+
+    public string GetPlayerName()
+    {
+        return playerName;
     }
 }

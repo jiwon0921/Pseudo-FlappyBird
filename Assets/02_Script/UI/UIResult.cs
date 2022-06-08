@@ -15,6 +15,6 @@ public class UIResult : UIView
 
     public void UpdateBestScore()
     {
-        //
+        bestScore.text = GameManager.Instance.bestScore.ToString();
     }
 }

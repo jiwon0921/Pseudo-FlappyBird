@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 
 
-namespace PFB
+namespace PFB.Log
 {
     public enum ePFBLogType
     {

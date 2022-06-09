@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     public UIReady uiReady;
     public UIResult uiResult;
     public UIRanking uiRanking;
+    public UIDataLoading uiDataLoading;
 
     private void Awake()
     {
@@ -19,6 +20,8 @@ public class UIManager : MonoBehaviour
             Instance = this;
         }
 
+
+        uiRanking.Init();
         //GameObject.DontDestroyOnLoad(this.gameObject);
     }
 }

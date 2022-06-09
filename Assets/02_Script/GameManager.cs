@@ -1,12 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PFB;
+using PFB.Log;
+using PFB.Database;
+using System.Threading.Tasks;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public PlayerData playerData;
+    public PFBUserData currentUserData;
+    //public PlayerData playerData;
 
     public ColumnPool columnPool;
     public StageManager stageManager;
@@ -14,16 +19,18 @@ public class GameManager : MonoBehaviour
 
     public Vector2 originalBirdPosition;
 
-    public string playerName;
+    //public string currentPlayerName;
 
     public int score;
-    public int bestScore = 0;
+    public int bestScore => (int)currentUserData.bestScoreData.score;
 
     public bool isGameover;
     public bool isReady;
 
     IEnumerator spawnAndMoveColumn;
     IEnumerator moveFloor;
+
+    public PFBLog PFBLog = new PFBLog("GameManager", Color.cyan);
 
     private void Awake()
     {
@@ -32,8 +39,11 @@ public class GameManager : MonoBehaviour
             Instance = this;
         }
 
+        PFBLogHelper.GetSafeCurrent();
+        PFBLogHelper.SetSaveMode(ePFBLogSaveMode.OnExit);
+
         // PlayerPrsfs에 저장한 데이터 삭제
-        PlayerPrefs.DeleteAll();
+        // PlayerPrefs.DeleteAll();
 
         //GameObject.DontDestroyOnLoad(this.gameObject);
     }
@@ -61,14 +71,20 @@ public class GameManager : MonoBehaviour
     {
         isReady = true;
         score = 0;
+
         UIManager.Instance.uiReady.Toggle(true);
         UIManager.Instance.uiReady.OffStartButton();
+
         UIManager.Instance.uiReady.namePanel.SetActive(true);
+
         UIManager.Instance.uiInGame.Toggle(false);
         UIManager.Instance.uiResult.Toggle(false);
         UIManager.Instance.uiRanking.Toggle(false);
+
         moveFloor = stageManager.MoveFloor();
+
         StartCoroutine(moveFloor);
+
     }
 
     public void GameStart()
@@ -78,25 +94,18 @@ public class GameManager : MonoBehaviour
         stageManager.initialize();
         UIManager.Instance.uiInGame.Toggle(true);
         UIManager.Instance.uiReady.Toggle(false);
+
+
+
         spawnAndMoveColumn = stageManager.SpawnAndMoveColumn();
+
         StartCoroutine(spawnAndMoveColumn);
     }
 
     public void GameOver()
     {
         isGameover = true;
-        CheckBestScore();
-        Debug.Log("Game Over");
-        StopCoroutine(spawnAndMoveColumn);
-        StopCoroutine(moveFloor);
-        PlayerData.Instance.UpdateRanking();
-        UIManager.Instance.uiResult.UpdateScore();
-        UIManager.Instance.uiResult.UpdateBestScore();
-        UIManager.Instance.uiRanking.LoadRankingData();
-        IEnumerator uiResult = ResultUIControl();
-        UIManager.Instance.uiInGame.flash.SetTrigger("Flash");
-        StartCoroutine(uiResult);
-
+        StartCoroutine(CoGameOver());
     }
 
     public void ReStart()
@@ -105,26 +114,94 @@ public class GameManager : MonoBehaviour
         GameReady();
     }
 
-    public void CheckBestScore()
+    //public void CheckBestScore()
+    //{
+    //    int currentScore = score;
+    //    int currentBestScore = bestScore;
+
+    //    if (currentScore > bestScore)
+    //    {
+    //        bestScore = currentScore;
+    //    }
+    //    else
+    //    {
+    //        bestScore = currentBestScore;
+    //    }
+
+    //    PlayerData.Instance.SetBestScore();
+    //}
+
+
+    private IEnumerator CoGameOver()
     {
-        int currentScore = score;
-        int currentBestScore = bestScore;
+        PFBLog.Log("Game Over");
 
-        if(currentScore > bestScore)
+
+        StopCoroutine(spawnAndMoveColumn);
+        StopCoroutine(moveFloor);
+        UIManager.Instance.uiInGame.flash.SetTrigger("Flash");
+
+        yield return new WaitForSeconds(0.5f);
+        UIManager.Instance.uiDataLoading.Toggle(true);
+        yield return null;
+        yield return StartCoroutine(CoTryUpdateBestScore());
+
+        //CheckBestScore();
+
+        yield return StartCoroutine(CoTryUpdateRankingData());
+        UIManager.Instance.uiDataLoading.Toggle(false);
+
+        // PlayerData.Instance.UpdateRanking();
+
+        UIManager.Instance.uiResult.UpdateScore();
+
+        UIManager.Instance.uiResult.UpdateBestScore();
+
+        //UIManager.Instance.uiRanking.LoadRankingData();
+
+        IEnumerator coResultUIControl = ResultUIControl();
+
+
+        StartCoroutine(coResultUIControl);
+    }
+    private IEnumerator CoTryUpdateBestScore()
+    {
+        //현재 점수가 데이터상의 베스트스코어보다 낮거나 같으면 아무것도 안함
+        if (score <= currentUserData.bestScoreData.score)
         {
-            bestScore = currentScore;
-        }
-        else
-        {
-            bestScore = currentBestScore;
+            yield break;
         }
 
-        PlayerData.Instance.SetBestScore();
+        //근데 이제 높으면 데이터 교체 작업을 들어가야함
+
+        PFBLog.Log("BestScore 변경 시도!");
+
+
+        Task requestUpdateUserScore = PFBDBManager.Instance.request
+            .UpdateUserBestScoreAsync(currentUserData,
+            new PFBScoreData((uint)score, System.DateTime.Now));
+
+        //요청 완료까지 대기
+        yield return new WaitUntil(() => requestUpdateUserScore.IsCompleted);
+
+        //bestScore = (int)currentUserData.bestScoreData.score;
+
+        //yield return StartCoroutine(CoTryUpdateRankingData());
+    }
+
+    private IEnumerator CoTryUpdateRankingData()
+    {
+        UIManager.Instance.uiDataLoading.Toggle(true);
+        yield return null;
+        yield return StartCoroutine(UIManager.Instance.uiRanking.CoLoadRankingData());
+        UIManager.Instance.uiDataLoading.Toggle(false);
+
+        yield break;
     }
 
     public void OpenRanking(bool val)
     {
-        if(val)
+        if (val)
         {
             UIManager.Instance.uiRanking.Toggle(true);
         }
@@ -149,11 +226,11 @@ public class GameManager : MonoBehaviour
 
     public int GetBestScore()
     {
-        return bestScore;
+        return (int)currentUserData.bestScoreData.score;
     }
 
     public string GetPlayerName()
     {
-        return playerName;
+        return currentUserData.userName;
     }
 }

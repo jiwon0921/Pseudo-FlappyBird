@@ -19,7 +19,6 @@ public class PlayerData : MonoBehaviour
 
     public void UpdateRanking()
     {
-        Debug.Log("updateScore");
 
         int currentScore = GameManager.Instance.GetScore();
         string currentName = GameManager.Instance.GetPlayerName();

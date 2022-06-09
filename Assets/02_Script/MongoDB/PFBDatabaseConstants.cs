@@ -92,7 +92,7 @@ namespace PFB.Database
 
         public static string DateTimeToString(DateTime dateTime)
         {
-            return dateTime.ToString("yyyy-MM-dd-HH:mm");
+            return dateTime.ToString("yyyy-MM-dd HH:mm");
         }
     }
 }

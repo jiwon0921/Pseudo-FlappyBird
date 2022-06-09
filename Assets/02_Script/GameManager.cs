@@ -95,11 +95,10 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.uiInGame.Toggle(true);
         UIManager.Instance.uiReady.Toggle(false);
 
-
-
         spawnAndMoveColumn = stageManager.SpawnAndMoveColumn();
-
         StartCoroutine(spawnAndMoveColumn);
+
+        bird.Flappy();
     }
 
     public void GameOver()

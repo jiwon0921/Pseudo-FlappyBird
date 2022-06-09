@@ -61,7 +61,7 @@ public class BirdController : MonoBehaviour
         rigidBody.velocity += Vector2.down * gravity * normalizedGravity;
     }
 
-    private void Flappy()
+    public void Flappy()
     {
         rigidBody.velocity = Vector2.up * flappyPower * normalizedFlappyPower;
 

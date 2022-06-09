@@ -35,7 +35,7 @@ namespace PFB.Log
         private DirectoryInfo localDirectoryInfo;
         private FileInfo localFileInfo;
 
-        public string localFilePath { get; private set; } = Directory.GetCurrentDirectory() + @"\PFBLogs\PFBLog-" + DateTime.Today.ToString("yyyy-MM-dd") + ".log";
+        public string localFilePath { get; private set; } = Directory.GetCurrentDirectory() + @"\PFBLogs\PFBLog-" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm") + ".log";
         public string localDirectioryPath { get; private set; } = Directory.GetCurrentDirectory() + @"\PFBLogs";
 
 

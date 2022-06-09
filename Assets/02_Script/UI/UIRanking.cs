@@ -105,7 +105,7 @@ public class UIRanking : UIView
 
 
         bool isPlayer = false;
-        for (int i = 0; i < rankingContentList.Count; i++)
+        for (int i = 0; i < userList.Count; i++)
         {
             isPlayer = userList[i].userName == GameManager.Instance.currentUserData.userName;
 

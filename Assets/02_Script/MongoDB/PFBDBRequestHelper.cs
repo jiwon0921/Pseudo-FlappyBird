@@ -42,7 +42,7 @@ namespace PFB.Database
         /// </summary>
         public async Task<bool> IsExistUserNameAsync(string userName)
         {
-            PFBLog.LogDebug("유저 이름 존재 여부 검사");
+            PFBLog.LogDebug("유저 이름 존재 여부 검사 : " + userName);
             var filter = Builders<PFBUserData>.Filter.Eq("userName", userName);
             var test = await GetUserDataCollection().Find(filter).AnyAsync();
             return test;
@@ -96,7 +96,7 @@ namespace PFB.Database
 
         public async Task UpdateUserBestScoreAsync(PFBUserData user, PFBScoreData newBestScore)
         {
-            PFBLog.LogDebug($"{user.userName} 최고점수 갱신 시도...기존 점수: {user.bestScoreData.score} | 갱신될 점수: {newBestScore.recordedDate}");
+            PFBLog.LogDebug($"{user.userName}의 최고점수 갱신 시도...기존 점수: {user.bestScoreData.score} | 갱신될 점수: {newBestScore.score}");
             user.bestScoreData.Copy(newBestScore);
 
             var filterDef = Builders<PFBUserData>.Filter.Eq(DbString.userName, user.userName);

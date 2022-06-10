@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
         
         PFBLogHelper.SetSaveMode(ePFBLogSaveMode.OnExit);
 
-        PFBLogHelper.SetCurrentLogLevel(ePFBLogLevel.Info);
+        PFBLogHelper.SetCurrentLogLevel(ePFBLogLevel.All);
 
 
         // PlayerPrsfs에 저장한 데이터 삭제
@@ -178,9 +178,6 @@ public class GameManager : MonoBehaviour
         }
 
         //근데 이제 높으면 데이터 교체 작업을 들어가야함
-
-        PFBLog.LogDebug("BestScore 변경 시도!");
-
 
         Task requestUpdateUserScore = PFBDBManager.Instance.request
             .UpdateUserBestScoreAsync(currentUserData,

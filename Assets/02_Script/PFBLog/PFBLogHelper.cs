@@ -168,7 +168,6 @@ namespace PFB.Log
         /// <param name="logType"></param>
         private bool IsAllowedLevel(ePFBLogType logType)
         {
-
             return (int)logType >= (int)current.logLevel;
         }
         public static PFBLogHelper GetSafeCurrent()

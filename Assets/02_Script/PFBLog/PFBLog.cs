@@ -18,6 +18,17 @@ namespace PFB.Log
         Error = 4,
     }
 
+    public enum ePFBLogLevel
+    {
+        Off = -1,
+        Log = 0,
+        Debug = 1,
+        Info = 2,
+        Warning = 3,
+        Error = 4,
+        All = 5,
+    }
+
     public class PFBLogMessage
     {
         public ePFBLogType pfbLogType;
@@ -43,7 +54,7 @@ namespace PFB.Log
 
         public PFBLogMessage(string date, string title, string msg)
         {
-            pfbLogType = PFBLogHelper.current.logLevel;
+            pfbLogType = (ePFBLogType)Mathf.Clamp((int)PFBLogHelper.current.logLevel, 0, 5);
             dateString = date;
             titleString = title;
             titleRichString = title;

@@ -22,7 +22,7 @@ namespace PFB.Log
         // 설정 관련
         //----------------------------------
         public ePFBLogSaveMode logSaveMode { get; private set; }
-        public ePFBLogType logLevel { get; private set; } = ePFBLogType.Error;
+        public ePFBLogLevel logLevel { get; private set; } = ePFBLogLevel.All;
 
 
 
@@ -30,7 +30,6 @@ namespace PFB.Log
         // File 관련
         //----------------------------------
 
-        public string logTypeString { get; private set; }
 
         private DirectoryInfo localDirectoryInfo;
         private FileInfo localFileInfo;
@@ -63,10 +62,6 @@ namespace PFB.Log
 
         public void LogType(PFBLogMessage msg)
         {
-            if (msg.pfbLogType == ePFBLogType.Log)
-            {
-                msg.pfbLogType = current.logLevel;
-            }
 
             switch (msg.pfbLogType)
             {
@@ -193,7 +188,7 @@ namespace PFB.Log
                 //큐 초기화
                 current.logStringQueue = new Queue<string>();
 
-                current.logLevel = ePFBLogType.Error;
+                current.logLevel = ePFBLogLevel.All;
                 return current;
             }
             //있으면 뭐...
@@ -240,49 +235,15 @@ namespace PFB.Log
             return str;
         }
 
-        public static void SetCurrentLogLevel(ePFBLogType logType)
+        public static void SetCurrentLogLevel(ePFBLogLevel level)
         {
-            if (logType == ePFBLogType.Log)
-            {
-                logType = ePFBLogType.Debug;
-            }
-            current.logLevel = logType;
-            current.SetLogTypeString(logType);
+            current.logLevel = level;
         }
         public static void SetSaveMode(ePFBLogSaveMode saveMode)
         {
             current.logSaveMode = saveMode;
         }
 
-        private void SetLogTypeString(ePFBLogType logType)
-        {
-            switch (logType)
-            {
-                case ePFBLogType.Log:
-                    logTypeString = "[LOG]";
-                    break;
-
-                case ePFBLogType.Debug:
-                    logTypeString = "[DEBUG]";
-                    break;
-
-                case ePFBLogType.Info:
-                    logTypeString = "[INFO]";
-                    break;
-
-                case ePFBLogType.Warning:
-                    logTypeString = "[WARN]";
-                    break;
-
-                case ePFBLogType.Error:
-                    logTypeString = "[ERROR]";
-                    break;
-
-                default:
-                    logTypeString = "[LOG]";
-                    break;
-            }
-        }
         private string GetLogTypeString(ePFBLogType logType)
         {
             string logTypeString = string.Empty;

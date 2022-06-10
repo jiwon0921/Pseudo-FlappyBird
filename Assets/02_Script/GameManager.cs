@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
         
         PFBLogHelper.SetSaveMode(ePFBLogSaveMode.OnExit);
 
-        PFBLogHelper.SetCurrentLogLevel(ePFBLogType.Info);
+        PFBLogHelper.SetCurrentLogLevel(ePFBLogLevel.Info);
 
 
         // PlayerPrsfs에 저장한 데이터 삭제

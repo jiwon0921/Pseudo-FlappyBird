@@ -314,7 +314,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.06
+  m_Radius: 0.037485454
 --- !u!50 &21713051
 Rigidbody2D:
   serializedVersion: 4
@@ -401,7 +401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rigidBody: {fileID: 21713051}
-  gravity: 1
+  gravity: 2
   flappyPower: 1.4
   animator: {fileID: 21713049}
   birdSounds:

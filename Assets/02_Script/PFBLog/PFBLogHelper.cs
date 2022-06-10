@@ -63,15 +63,15 @@ namespace PFB.Log
 
         public void LogType(PFBLogMessage msg)
         {
-            if (msg.pfbLogType == ePFBLogType.Default)
+            if (msg.pfbLogType == ePFBLogType.Log)
             {
                 msg.pfbLogType = current.logLevel;
             }
 
             switch (msg.pfbLogType)
             {
-                case ePFBLogType.Default:
                 case ePFBLogType.Log:
+                case ePFBLogType.Debug:
                     Log(msg);
                     break;
 
@@ -93,24 +93,34 @@ namespace PFB.Log
         }
         public void Log(PFBLogMessage msg)
         {
-            msg.pfbLogType = ePFBLogType.Log;
-            Debug.Log(GetLogTextForUnityConsole(msg));
-            TrySaveLog(msg);
+            msg.pfbLogType = ePFBLogType.Debug;
+            if (IsAllowedLevel(msg.pfbLogType))
+            {
+                Debug.Log(GetLogTextForUnityConsole(msg));
+                TrySaveLog(msg);
+            }
+
         }
         public void LogInfo(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Info;
             msg.messageString = "<color=blue>" + msg.messageString + "</color>";
-
-            Debug.Log(GetLogTextForUnityConsole(msg));
-            TrySaveLog(msg);
+            if (IsAllowedLevel(msg.pfbLogType))
+            {
+                Debug.Log(GetLogTextForUnityConsole(msg));
+                TrySaveLog(msg);
+            }
         }
 
         public void LogWarning(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Warning;
-            Debug.LogWarning(GetLogTextForUnityConsole(msg));
-            TrySaveLog(msg);
+
+            if (IsAllowedLevel(msg.pfbLogType))
+            {
+                Debug.Log(GetLogTextForUnityConsole(msg));
+                TrySaveLog(msg);
+            }
 
         }
         public void LogError(PFBLogMessage msg)
@@ -118,18 +128,15 @@ namespace PFB.Log
             msg.pfbLogType = ePFBLogType.Error;
             msg.messageString = "<color=red>" + msg.messageString + "</color>";
 
-            Debug.LogError(GetLogTextForUnityConsole(msg));
-            TrySaveLog(msg);
+            if (IsAllowedLevel(msg.pfbLogType))
+            {
+                Debug.Log(GetLogTextForUnityConsole(msg));
+                TrySaveLog(msg);
+            }
         }
 
         private void TrySaveLog(PFBLogMessage msg)
         {
-
-            if ((int)msg.pfbLogType > (int)current.logLevel)
-            {
-                return;
-            }
-
 
             string str;
             switch (logSaveMode)
@@ -157,6 +164,16 @@ namespace PFB.Log
             }
         }
 
+
+        /// <summary>
+        /// 해당 로그 타입이 현재 레벨 상에서 표시가 허용되는지 안허용되는지...
+        /// </summary>
+        /// <param name="logType"></param>
+        private bool IsAllowedLevel(ePFBLogType logType)
+        {
+
+            return (int)logType >= (int)current.logLevel;
+        }
         public static PFBLogHelper GetSafeCurrent()
         {
             //없으면 새로 생성해야함
@@ -223,9 +240,9 @@ namespace PFB.Log
 
         public static void SetCurrentLogLevel(ePFBLogType logType)
         {
-            if (logType == ePFBLogType.Default)
+            if (logType == ePFBLogType.Log)
             {
-                logType = ePFBLogType.Log;
+                logType = ePFBLogType.Debug;
             }
             current.logLevel = logType;
             current.SetLogTypeString(logType);
@@ -235,27 +252,30 @@ namespace PFB.Log
             current.logSaveMode = saveMode;
         }
 
-        /// <summary>
-        /// 로그의 저장 방식을 설정합니다.
-        /// </summary>
-        /// <param name="saveMode"></param>
         private void SetLogTypeString(ePFBLogType logType)
         {
             switch (logType)
             {
-                case ePFBLogType.Default:
                 case ePFBLogType.Log:
                     logTypeString = "[LOG]";
                     break;
+
+                case ePFBLogType.Debug:
+                    logTypeString = "[DEBUG]";
+                    break;
+
                 case ePFBLogType.Info:
                     logTypeString = "[INFO]";
                     break;
+
                 case ePFBLogType.Warning:
                     logTypeString = "[WARN]";
                     break;
+
                 case ePFBLogType.Error:
                     logTypeString = "[ERROR]";
                     break;
+
                 default:
                     logTypeString = "[LOG]";
                     break;
@@ -263,28 +283,36 @@ namespace PFB.Log
         }
         private string GetLogTypeString(ePFBLogType logType)
         {
-            string str;
+            string logTypeString = string.Empty;
+
             switch (logType)
             {
-                case ePFBLogType.Default:
                 case ePFBLogType.Log:
-                    str = "[LOG]";
+                    logTypeString = "[LOG]";
                     break;
+
+                case ePFBLogType.Debug:
+                    logTypeString = "[DEBUG]";
+                    break;
+
                 case ePFBLogType.Info:
-                    str = "[INFO]";
+                    logTypeString = "[INFO]";
                     break;
+
                 case ePFBLogType.Warning:
-                    str = "[WARN]";
+                    logTypeString = "[WARN]";
                     break;
+
                 case ePFBLogType.Error:
-                    str = "[ERROR]";
+                    logTypeString = "[ERROR]";
                     break;
+
                 default:
-                    str = "[LOG]";
+                    logTypeString = "[LOG]";
                     break;
             }
 
-            return str;
+            return logTypeString;
         }
 
 

@@ -40,8 +40,12 @@ public class GameManager : MonoBehaviour
         }
 
         PFBLogHelper.GetSafeCurrent();
+        
         PFBLogHelper.SetSaveMode(ePFBLogSaveMode.OnExit);
-        //PFBLogHelper.SetCurrentLogLevel(ePFBLogType.Error);
+
+        PFBLogHelper.SetCurrentLogLevel(ePFBLogType.Info);
+
+
         // PlayerPrsfs에 저장한 데이터 삭제
         // PlayerPrefs.DeleteAll();
 

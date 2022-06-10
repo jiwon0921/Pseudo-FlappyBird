@@ -89,21 +89,19 @@ namespace PFB.Log
         public void LogDebug(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Debug;
-            msg.messageString = $"<color=green>{GetLogTypeString(msg.pfbLogType)}</color> {msg.messageString}";
             if (IsAllowedLevel(msg.pfbLogType))
             {
-                Debug.Log(GetLogTextForUnityConsole(msg));
+                Debug.Log($"<color=green>{GetLogTypeString(msg.pfbLogType)}</color> {GetLogTextForUnityConsole(msg)}");
                 TrySaveLog(msg);
             }
         }
         public void LogInfo(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Info;
-            msg.messageString = $"<color=blue>{GetLogTypeString(msg.pfbLogType)}</color> {msg.messageString}";
 
             if (IsAllowedLevel(msg.pfbLogType))
             {
-                Debug.Log(GetLogTextForUnityConsole(msg));
+                Debug.Log($"<color=blue>{GetLogTypeString(msg.pfbLogType)}</color> {GetLogTextForUnityConsole(msg)}");
                 TrySaveLog(msg);
             }
         }
@@ -111,11 +109,10 @@ namespace PFB.Log
         public void LogWarning(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Warning;
-            msg.messageString = $"<color=yellow>{GetLogTypeString(msg.pfbLogType)}</color> {msg.messageString}";
 
             if (IsAllowedLevel(msg.pfbLogType))
             {
-                Debug.Log(GetLogTextForUnityConsole(msg));
+                Debug.Log($"<color=yellow>{GetLogTypeString(msg.pfbLogType)}</color> {GetLogTextForUnityConsole(msg)}");
                 TrySaveLog(msg);
             }
 
@@ -123,11 +120,10 @@ namespace PFB.Log
         public void LogError(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Error;
-            msg.messageString = $"<color=red>{GetLogTypeString(msg.pfbLogType)}</color> {msg.messageString}";
 
             if (IsAllowedLevel(msg.pfbLogType))
             {
-                Debug.Log(GetLogTextForUnityConsole(msg));
+                Debug.Log($"<color=red>{GetLogTypeString(msg.pfbLogType)}</color> {GetLogTextForUnityConsole(msg)}");
                 TrySaveLog(msg);
             }
         }

@@ -69,7 +69,7 @@ namespace PFB.Log
         [Tooltip("로그를 발송할 때마다 저장합니다.")]
         OnRealTime,
 
-        [Tooltip("에디터와 게임의 동작이 다릅니다. \n[Editor]PlayMode가 종료될 때 한꺼번에 저장합니다.\n[Game]게임이 종료될 때 한꺼번에 저장합니다.")]
+        [Tooltip("에디터와 게임의 동작이 다릅니다. \n[Editor]PlayMode가 종료될 때 한꺼번에 저장합니다.\n[Game]프로그램이 종료될 때 한꺼번에 저장합니다.")]
         OnExit,
     }
 

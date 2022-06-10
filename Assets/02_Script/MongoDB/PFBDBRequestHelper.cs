@@ -40,11 +40,11 @@ namespace PFB.Database
         /// <summary>
         /// 해당 userName을 가진 데이터가 있나 찾아봅니다.
         /// </summary>
-        public bool IsExistUserName(string userName)
+        public async Task<bool> IsExistUserNameAsync(string userName)
         {
             var filter = Builders<PFBUserData>.Filter.Eq("userName", userName);
-            bool result = GetUserDataCollection().Find(filter).Any();
-            return result;
+            var test = await GetUserDataCollection().Find(filter).AnyAsync();
+            return test;
         }
 
 
@@ -76,7 +76,8 @@ namespace PFB.Database
             PFBUserData result = null;
             var filter = Builders<PFBUserData>.Filter.Eq(DbString.userName, userName);
 
-            if (IsExistUserName(userName))
+            bool isExist = await IsExistUserNameAsync(userName);
+            if (isExist)
             {
                 result = await GetUserDataCollection().Find(filter).FirstOrDefaultAsync();
 
@@ -101,7 +102,7 @@ namespace PFB.Database
 
             var result = await GetUserDataCollection().UpdateOneAsync(filterDef, updateDef);
 
-           // PFBLog.Log($"{result.userName}:{result.bestScoreData.score}");
+            // PFBLog.Log($"{result.userName}:{result.bestScoreData.score}");
         }
 
         /// <summary>

@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
         PFBLogHelper.GetSafeCurrent();
         PFBLogHelper.SetSaveMode(ePFBLogSaveMode.OnExit);
-
+        //PFBLogHelper.SetCurrentLogLevel(ePFBLogType.Error);
         // PlayerPrsfs에 저장한 데이터 삭제
         // PlayerPrefs.DeleteAll();
 
@@ -53,6 +53,8 @@ public class GameManager : MonoBehaviour
         columnPool.initilaze();
         GameReady();
         originalBirdPosition = bird.transform.position;
+
+        PFBLog.LogInfo("Start Game");
     }
 
     public void initialize()

@@ -104,6 +104,11 @@ public class UIRanking : UIView
         yield return new WaitUntil(() => request.IsCompleted);
 
 
+        if (userList == null)
+        {
+            PFBLog.LogError("userList is Null!");
+            yield break;
+        }
         bool isPlayer = false;
         for (int i = 0; i < userList.Count; i++)
         {
@@ -125,4 +130,7 @@ public class UIRanking : UIView
         secondName.text = PlayerPrefs.GetString("SecondName");
         thirdName.text = PlayerPrefs.GetString("ThirdName");
     }
+
+
+    private PFB.Log.PFBLog PFBLog = new PFB.Log.PFBLog("UIRanking", default, false);
 }

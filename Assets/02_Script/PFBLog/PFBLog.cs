@@ -43,7 +43,7 @@ namespace PFB.Log
 
         public PFBLogMessage(string date, string title, string msg)
         {
-            pfbLogType = PFBLogHelper.current.defaultLogType;
+            pfbLogType = PFBLogHelper.current.logLevel;
             dateString = date;
             titleString = title;
             titleRichString = title;

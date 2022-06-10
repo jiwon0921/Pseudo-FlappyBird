@@ -92,7 +92,8 @@ namespace PFB.Database
 
             foreach (var item in users)
             {
-                if (!request.IsExistUserName(item.userName))
+                var isExist = await request.IsExistUserNameAsync(item.userName);
+                if (!isExist)
                 {
                     await request.CreateUserAsync(item, currentAccess);
                 }

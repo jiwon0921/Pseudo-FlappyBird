@@ -22,7 +22,7 @@ namespace PFB.Log
         // 설정 관련
         //----------------------------------
         public ePFBLogSaveMode logSaveMode { get; private set; }
-        public ePFBLogType defaultLogType { get; private set; } = ePFBLogType.Log;
+        public ePFBLogType logLevel { get; private set; } = ePFBLogType.Error;
 
 
 
@@ -65,7 +65,7 @@ namespace PFB.Log
         {
             if (msg.pfbLogType == ePFBLogType.Default)
             {
-                msg.pfbLogType = current.defaultLogType;
+                msg.pfbLogType = current.logLevel;
             }
 
             switch (msg.pfbLogType)
@@ -101,6 +101,7 @@ namespace PFB.Log
         {
             msg.pfbLogType = ePFBLogType.Info;
             msg.messageString = "<color=blue>" + msg.messageString + "</color>";
+
             Debug.Log(GetLogTextForUnityConsole(msg));
             TrySaveLog(msg);
         }
@@ -115,12 +116,21 @@ namespace PFB.Log
         public void LogError(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Error;
+            msg.messageString = "<color=red>" + msg.messageString + "</color>";
+
             Debug.LogError(GetLogTextForUnityConsole(msg));
             TrySaveLog(msg);
         }
 
         private void TrySaveLog(PFBLogMessage msg)
         {
+
+            if ((int)msg.pfbLogType > (int)current.logLevel)
+            {
+                return;
+            }
+
+
             string str;
             switch (logSaveMode)
             {
@@ -136,6 +146,12 @@ namespace PFB.Log
                     SaveLogToTxtFile();
                     break;
 
+                case ePFBLogSaveMode.OnExit:
+
+                    str = GetLogTextForFile(msg);
+                    logStringQueue.Enqueue(str);
+
+                    break;
                 default:
                     break;
             }
@@ -157,6 +173,8 @@ namespace PFB.Log
                 current.SetLocalDirectoryAndFileInfo(localDirectioryPath, localFilePath);
                 //큐 초기화
                 current.logStringQueue = new Queue<string>();
+
+                current.logLevel = ePFBLogType.Error;
                 return current;
             }
             //있으면 뭐...
@@ -203,13 +221,13 @@ namespace PFB.Log
             return str;
         }
 
-        public static void SetDefaultLogType(ePFBLogType logType)
+        public static void SetCurrentLogLevel(ePFBLogType logType)
         {
             if (logType == ePFBLogType.Default)
             {
                 logType = ePFBLogType.Log;
             }
-            current.defaultLogType = logType;
+            current.logLevel = logType;
             current.SetLogTypeString(logType);
         }
         public static void SetSaveMode(ePFBLogSaveMode saveMode)
@@ -301,6 +319,8 @@ namespace PFB.Log
                     while (logStringQueue.Count > 0)
                     {
                         logText = logStringQueue.Dequeue();
+
+
                         sw.WriteLine(logText);
                     }
                     sw.Close();

@@ -72,7 +72,7 @@ namespace PFB.Log
             {
                 case ePFBLogType.Log:
                 case ePFBLogType.Debug:
-                    Log(msg);
+                    LogDebug(msg);
                     break;
 
                 case ePFBLogType.Info:
@@ -87,24 +87,25 @@ namespace PFB.Log
                     LogError(msg);
                     break;
                 default:
-                    Log(msg);
+                    LogDebug(msg);
                     break;
             }
         }
-        public void Log(PFBLogMessage msg)
+        public void LogDebug(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Debug;
+            msg.messageString = $"<color=green>{GetLogTypeString(msg.pfbLogType)}</color> {msg.messageString}";
             if (IsAllowedLevel(msg.pfbLogType))
             {
                 Debug.Log(GetLogTextForUnityConsole(msg));
                 TrySaveLog(msg);
             }
-
         }
         public void LogInfo(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Info;
-            msg.messageString = "<color=blue>" + msg.messageString + "</color>";
+            msg.messageString = $"<color=blue>{GetLogTypeString(msg.pfbLogType)}</color> {msg.messageString}";
+
             if (IsAllowedLevel(msg.pfbLogType))
             {
                 Debug.Log(GetLogTextForUnityConsole(msg));
@@ -115,6 +116,7 @@ namespace PFB.Log
         public void LogWarning(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Warning;
+            msg.messageString = $"<color=yellow>{GetLogTypeString(msg.pfbLogType)}</color> {msg.messageString}";
 
             if (IsAllowedLevel(msg.pfbLogType))
             {
@@ -126,7 +128,7 @@ namespace PFB.Log
         public void LogError(PFBLogMessage msg)
         {
             msg.pfbLogType = ePFBLogType.Error;
-            msg.messageString = "<color=red>" + msg.messageString + "</color>";
+            msg.messageString = $"<color=red>{GetLogTypeString(msg.pfbLogType)}</color> {msg.messageString}";
 
             if (IsAllowedLevel(msg.pfbLogType))
             {
@@ -374,11 +376,11 @@ namespace PFB.Log
             {
                 return;
             }
+
             if (current.logSaveMode == ePFBLogSaveMode.OnExit)
             {
                 SaveLogToTxtFile();
             }
-
         }
 
 

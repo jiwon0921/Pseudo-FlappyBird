@@ -15,7 +15,7 @@ namespace PFB.Database
     public class PFBDBRequestHelper
     {
         private DbAccessInfo access;
-        private PFBLog PFBLog = new PFBLog("DBRequest", Color.green);
+        private PFBLog PFBLog = new PFBLog("DBRequest", Color.magenta);
 
         public PFBDBRequestHelper(DbAccessInfo accessInfo)
         {
@@ -42,6 +42,7 @@ namespace PFB.Database
         /// </summary>
         public async Task<bool> IsExistUserNameAsync(string userName)
         {
+            PFBLog.LogDebug("유저 이름 존재 여부 검사");
             var filter = Builders<PFBUserData>.Filter.Eq("userName", userName);
             var test = await GetUserDataCollection().Find(filter).AnyAsync();
             return test;
@@ -53,8 +54,9 @@ namespace PFB.Database
         /// </summary>
         public async Task CreateUserAsync(PFBUserData data, DbAccessInfo accessInfo, UnityAction onEnd = null)
         {
+
             await GetUserDataCollection().InsertOneAsync(data);
-            PFBLog.LogInfo($"Create User : {data.userName}");
+            PFBLog.LogInfo($"유저 데이터 생성 : {data.userName}");
             onEnd?.Invoke();
         }
 
@@ -65,12 +67,10 @@ namespace PFB.Database
 
             onEnd?.Invoke(result);
         }
+
         /// <summary>
         /// 기본적으로는 <see href="GetUserDataByNameAsync"/>과 똑같습니다. 하지만, 없는지 체크까지 하고 없으면 만들어준다는 점이 다릅니다.
         /// </summary>
-        /// <param name="userName"></param>
-        /// <param name="onEnd"></param>
-        /// <returns></returns>
         public async Task GetUserDataByNameAsyncSafe(string userName, UnityAction<PFBUserData> onEnd)
         {
             PFBUserData result = null;
@@ -84,6 +84,7 @@ namespace PFB.Database
             }
             else
             {
+                PFBLog.LogDebug($"새로운 유저입니다 :{userName}");
                 await CreateUserAsync(PFBUserData.CreateDefault(userName), access);
 
                 result = await GetUserDataCollection().Find(filter).FirstOrDefaultAsync();
@@ -95,10 +96,13 @@ namespace PFB.Database
 
         public async Task UpdateUserBestScoreAsync(PFBUserData user, PFBScoreData newBestScore)
         {
+            PFBLog.LogDebug($"{user.userName} 최고점수 갱신 시도...기존 점수: {user.bestScoreData.score} | 갱신될 점수: {newBestScore.recordedDate}");
             user.bestScoreData.Copy(newBestScore);
 
             var filterDef = Builders<PFBUserData>.Filter.Eq(DbString.userName, user.userName);
             var updateDef = Builders<PFBUserData>.Update.Set(x => x.bestScoreData, newBestScore);
+
+
 
             var result = await GetUserDataCollection().UpdateOneAsync(filterDef, updateDef);
 
@@ -118,6 +122,8 @@ namespace PFB.Database
                 .Sort(sortFilter)
                 .Limit(maxUserCount).ToListAsync<PFBUserData>();
 
+
+            PFBLog.LogDebug($"{maxUserCount}개의 랭킹용 데이터를 가져왔습니다.");
             onEnd?.Invoke(result);
         }
 

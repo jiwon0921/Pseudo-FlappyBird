@@ -121,12 +121,12 @@ namespace PFB.Log
             //PFBLogHelper.current.LogType(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
         }
 
-        public void Log(object msg)
+        public void LogDebug(object msg)
         {
             message.dateString = PFBLogHelper.current.GetDateTime();
             message.messageString = msg.ToString();
-            PFBLogHelper.current.Log(message);
-            //PFBLogHelper.current.Log(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
+            PFBLogHelper.current.LogDebug(message);
+
         }
 
         public void LogInfo(object msg)
@@ -134,7 +134,7 @@ namespace PFB.Log
             message.dateString = PFBLogHelper.current.GetDateTime();
             message.messageString = msg.ToString();
             PFBLogHelper.current.LogInfo(message);
-            //PFBLogHelper.current.LogInfo(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
+
         }
 
         public void LogWarning(object msg)
@@ -142,7 +142,7 @@ namespace PFB.Log
             message.dateString = PFBLogHelper.current.GetDateTime();
             message.messageString = msg.ToString();
             PFBLogHelper.current.LogWarning(message);
-            //PFBLogHelper.current.LogWarning(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
+
         }
 
         public void LogError(object msg)
@@ -150,7 +150,7 @@ namespace PFB.Log
             message.dateString = PFBLogHelper.current.GetDateTime();
             message.messageString = msg.ToString();
             PFBLogHelper.current.LogError(message);
-            //PFBLogHelper.current.LogError(new PFBLogMessage(PFBLogHelper.current.GetDateTime(), objectTitleRichText, objectTitle, msg.ToString()));
+
         }
 
     }

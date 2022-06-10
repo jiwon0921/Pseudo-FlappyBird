@@ -99,13 +99,13 @@ namespace PFB.Database
                 }
                 else
                 {
-                    PFBLog.Log("Try Update " + item.userName);
+                    PFBLog.LogDebug("Try Update " + item.userName);
                     await request.UpdateUserBestScoreAsync(item, new PFBScoreData(1, DateTime.Now));
                 }
 
             }
 
-            PFBLog.Log("End Test process");
+            PFBLog.LogDebug("End Test process");
         }
 
         //public async Task TestProcessAsync()
@@ -139,8 +139,6 @@ namespace PFB.Database
                 Credential = cr,
                 Server = new MongoServerAddress("172.30.1.59", 27017)
             };
-
-
 
             return new MongoClient(clientSettings);
         }

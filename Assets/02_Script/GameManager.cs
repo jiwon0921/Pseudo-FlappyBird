@@ -139,7 +139,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator CoGameOver()
     {
-        PFBLog.Log("Game Over");
+        PFBLog.LogDebug("Game Over");
 
 
         StopCoroutine(spawnAndMoveColumn);
@@ -179,7 +179,7 @@ public class GameManager : MonoBehaviour
 
         //근데 이제 높으면 데이터 교체 작업을 들어가야함
 
-        PFBLog.Log("BestScore 변경 시도!");
+        PFBLog.LogDebug("BestScore 변경 시도!");
 
 
         Task requestUpdateUserScore = PFBDBManager.Instance.request
